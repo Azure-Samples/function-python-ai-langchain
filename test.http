@@ -1,0 +1,8 @@
+
+
+POST http://localhost:7071/api/ask HTTP/1.1
+content-type: application/json
+
+{
+    "prompt": "What is a good feature of Azure Functions?"
+}
