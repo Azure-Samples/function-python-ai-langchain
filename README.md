@@ -97,7 +97,7 @@ return chain.run(prompt) # prompt is human input from request body
 
 ## Deploy to Azure
 
-The easiest way to deploy this app is using the [Azure Dev CLI aka AZD](https://aka.ms/azd).  If you open this repo in GitHub CodeSpaces the AZD tooling is already preinstalled.
+The easiest way to deploy this app is using the [Azure Dev CLI](https://aka.ms/azd).  If you open this repo in GitHub CodeSpaces the AZD tooling is already preinstalled.
 
 To provision and deploy:
 ```bash
