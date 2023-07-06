@@ -20,11 +20,12 @@ This sample shows how to take a human prompt as HTTP Get or Post input, calculat
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsStorage": "",
     "AZURE_OPENAI_KEY": "...",
     "AZURE_OPENAI_ENDPOINT": "https://<service_name>.openai.azure.com/",
     "AZURE_OPENAI_SERVICE": "...",
     "AZURE_OPENAI_CHATGPT_DEPLOYMENT": "...",
+    "OPENAI_API_VERSION": "2023-05-15",
     "USE_LANGCHAIN": "True"
   }
 }

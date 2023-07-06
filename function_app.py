@@ -9,7 +9,7 @@ from langchain.llms.openai import AzureOpenAI
 app = func.FunctionApp()
 
 @app.function_name(name='ask')
-@app.route(route='ask')
+@app.route(route='ask', auth_level='anonymous', methods=['POST'])
 def main(req):
 
     prompt = req.params.get('prompt') 
@@ -37,7 +37,8 @@ def main(req):
     openai.api_key = AZURE_OPENAI_KEY
     openai.api_base = AZURE_OPENAI_ENDPOINT # your endpoint should look like the following https://YOUR_RESOURCE_NAME.openai.azure.com/
     openai.api_type = 'azure'
-    openai.api_version = '2022-12-01' # this may change in the future
+    openai.api_version = '2023-05-15' # this may change in the future
+                                      # for langchain, set this version in environment variables using OPENAI_API_VERSION
 
     if bool(USE_LANGCHAIN):
         logging.info('Using Langchain')

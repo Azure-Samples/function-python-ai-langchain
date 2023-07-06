@@ -22,6 +22,9 @@ param logAnalyticsName string = ''
 param resourceGroupName string = ''
 param storageAccountName string = ''
 param aiResourceName string = ''
+param openAiResourceGroupName string = ''
+param openAiVersion string = '2023-05-15'
+
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -37,9 +40,13 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
+resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(openAiResourceGroupName)) {
+  name: !empty(openAiResourceGroupName) ? openAiResourceGroupName : rg.name
+}
+
 module ai 'app/ai.bicep' = {
   name: 'ai'
-  scope: rg
+  scope: openAiResourceGroup
   params: {
     name: !empty(aiResourceName) ? aiResourceName : '${abbrs.cognitiveServicesAccounts}-${resourceToken}'
     location: location
@@ -65,6 +72,7 @@ module api './app/api.bicep' = {
       AZURE_OPENAI_SERVICE: ai.outputs.AZURE_OPENAI_SERVICE
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: ai.outputs.AZURE_OPENAI_CHATGPT_DEPLOYMENT
       AZURE_OPENAI_GPT_DEPLOYMENT: ai.outputs.AZURE_OPENAI_GPT_DEPLOYMENT
+      OPENAI_API_VERSION: openAiVersion
       AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
     }
   }
