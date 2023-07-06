@@ -4,8 +4,10 @@ param tags object = {}
 
 param gptDeploymentName string = 'davinci'
 param gptModelName string = 'text-davinci-003'
+param gptDeploymentCapacity int = 30
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
+param chatGptDeploymentCapacity int = 30
 
 module openai '../core/ai/openai.bicep' = {
   name: 'ai-textanalytics'
@@ -15,26 +17,13 @@ module openai '../core/ai/openai.bicep' = {
     tags: tags
     deployments: [
       {
-        name: gptDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: gptModelName
-          version: '1'
-        }
-        scaleSettings: {
-          scaleType: 'Standard'
-        }
-      }
-      {
         name: chatGptDeploymentName
         model: {
           format: 'OpenAI'
           name: chatGptModelName
           version: '0301'
         }
-        scaleSettings: {
-          scaleType: 'Standard'
-        }
+        capacity: chatGptDeploymentCapacity
       }
     ]
   }

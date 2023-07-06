@@ -20,11 +20,12 @@ This sample shows how to take a human prompt as HTTP Get or Post input, calculat
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsStorage": "",
     "AZURE_OPENAI_KEY": "...",
     "AZURE_OPENAI_ENDPOINT": "https://<service_name>.openai.azure.com/",
     "AZURE_OPENAI_SERVICE": "...",
     "AZURE_OPENAI_CHATGPT_DEPLOYMENT": "...",
+    "OPENAI_API_VERSION": "2023-05-15",
     "USE_LANGCHAIN": "True"
   }
 }
@@ -34,7 +35,7 @@ This sample shows how to take a human prompt as HTTP Get or Post input, calculat
 1) Open a new terminal and do the following:
 
 ```bash
-pip3 install -r requirements.text
+pip3 install -r requirements.txt
 func start
 ```
 2) Using your favorite REST client, e.g. [RestClient in VS Code](https://marketplace.visualstudio.com/items?itemName=humao.rest-client), PostMan, curl, make a post.  `test.http` has been provided to run this quickly.   
