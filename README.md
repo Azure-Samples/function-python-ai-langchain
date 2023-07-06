@@ -35,7 +35,7 @@ This sample shows how to take a human prompt as HTTP Get or Post input, calculat
 1) Open a new terminal and do the following:
 
 ```bash
-pip3 install -r requirements.text
+pip3 install -r requirements.txt
 func start
 ```
 2) Using your favorite REST client, e.g. [RestClient in VS Code](https://marketplace.visualstudio.com/items?itemName=humao.rest-client), PostMan, curl, make a post.  `test.http` has been provided to run this quickly.   
