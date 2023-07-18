@@ -9,6 +9,8 @@ param appSettings object = {}
 param keyVaultName string
 param serviceName string = 'api'
 param storageAccountName string
+param openAiAccountName string
+param openAiResourceGroupName string
 
 module api '../core/host/functions.bicep' = {
   name: '${serviceName}-functions-python-module'
@@ -18,7 +20,9 @@ module api '../core/host/functions.bicep' = {
     tags: union(tags, { 'azd-service-name': serviceName })
     allowedOrigins: allowedOrigins
     alwaysOn: false
-    appSettings: appSettings
+    appSettings: union(appSettings, {
+        AZURE_OPENAI_KEY: openai.listKeys().key1
+      })
     applicationInsightsName: applicationInsightsName
     appServicePlanId: appServicePlanId
     keyVaultName: keyVaultName
@@ -31,6 +35,11 @@ module api '../core/host/functions.bicep' = {
     storageAccountName: storageAccountName
     scmDoBuildDuringDeployment: false
   }
+}
+
+resource openai 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
+  name: openAiAccountName
+  scope: resourceGroup(openAiResourceGroupName)
 }
 
 output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.identityPrincipalId

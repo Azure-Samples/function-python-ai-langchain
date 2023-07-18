@@ -2,14 +2,14 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
-param gptDeploymentName string = 'davinci'
-param gptModelName string = 'text-davinci-003'
+param gptDeploymentName string = 'turbo'
+param gptModelName string = 'gpt-35-turbo'
 param gptDeploymentCapacity int = 30
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chatGptDeploymentCapacity int = 30
 
-module openai '../core/ai/openai.bicep' = {
+module openai '../core/ai/cognitiveservices.bicep' = {
   name: 'ai-textanalytics'
   params: {
     name: name
@@ -23,7 +23,10 @@ module openai '../core/ai/openai.bicep' = {
           name: chatGptModelName
           version: '0301'
         }
-        capacity: chatGptDeploymentCapacity
+        sku: {
+          name: 'Standard'
+          capacity: chatGptDeploymentCapacity
+        }
       }
     ]
   }

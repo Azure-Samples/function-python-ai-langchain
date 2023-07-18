@@ -21,10 +21,9 @@ param keyVaultName string = ''
 param logAnalyticsName string = ''
 param resourceGroupName string = ''
 param storageAccountName string = ''
-param aiResourceName string = ''
+param openAiResourceName string = ''
 param openAiResourceGroupName string = ''
 param openAiVersion string = '2023-05-15'
-
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -48,7 +47,7 @@ module ai 'app/ai.bicep' = {
   name: 'ai'
   scope: openAiResourceGroup
   params: {
-    name: !empty(aiResourceName) ? aiResourceName : '${abbrs.cognitiveServicesAccounts}-${resourceToken}'
+    name: !empty(openAiResourceName) ? openAiResourceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     location: location
     tags: tags
   }
@@ -66,8 +65,9 @@ module api './app/api.bicep' = {
     appServicePlanId: appServicePlan.outputs.id
     keyVaultName: keyVault.outputs.name
     storageAccountName: storage.outputs.name
+    openAiAccountName: ai.outputs.AZURE_OPENAI_SERVICE
+    openAiResourceGroupName: openAiResourceGroup.name
     appSettings: {
-      AZURE_OPENAI_KEY: openai.listKeys().key1
       AZURE_OPENAI_ENDPOINT: ai.outputs.AZURE_OPENAI_ENDPOINT
       AZURE_OPENAI_SERVICE: ai.outputs.AZURE_OPENAI_SERVICE
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: ai.outputs.AZURE_OPENAI_CHATGPT_DEPLOYMENT
@@ -137,11 +137,6 @@ module monitoring './core/monitor/monitoring.bicep' = {
     applicationInsightsName: !empty(applicationInsightsName) ? applicationInsightsName : '${abbrs.insightsComponents}${resourceToken}'
     applicationInsightsDashboardName: !empty(applicationInsightsDashboardName) ? applicationInsightsDashboardName : '${abbrs.portalDashboards}${resourceToken}'
   }
-}
-
-resource openai 'Microsoft.CognitiveServices/accounts@2021-10-01' existing =  {
-  name: !empty(aiResourceName) ? aiResourceName : '${abbrs.cognitiveServicesAccounts}-${resourceToken}'
-  scope: rg
 }
 
 // Data outputs
