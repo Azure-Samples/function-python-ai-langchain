@@ -3,6 +3,7 @@ param location string = resourceGroup().location
 param tags object = {}
 
 param customSubDomainName string = name
+
 param deployments array = []
 param kind string = 'OpenAI'
 param publicNetworkAccess string = 'Enabled'
@@ -30,9 +31,9 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
     model: deployment.model
     raiPolicyName: contains(deployment, 'raiPolicyName') ? deployment.raiPolicyName : null
   }
-  sku: {
+  sku: contains(deployment, 'sku') ? deployment.sku : {
     name: 'Standard'
-    capacity: deployment.capacity
+    capacity: 20
   }
 }]
 
