@@ -1,3 +1,19 @@
+---
+page_type: sample
+languages:
+- azdeveloper
+- python
+- bicep
+products:
+- azure
+- azure-functions
+- azure-openai-service
+urlFragment: function-python-ai-langchain
+name: Azure Functions - LangChain with Azure OpenAI and ChatGPT (Python v2 Function)
+description: Using human prompt with Python as HTTP Get or Post input, calculates the completions using chains of human input and templates. 
+---
+<!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
+
 # Azure Functions
 ## LangChain with Azure OpenAI and ChatGPT (Python v2 Function)
 
