@@ -7,7 +7,7 @@ languages:
 products:
 - azure
 - azure-functions
-- azure-openai-service
+- azure-openai
 urlFragment: function-python-ai-langchain
 name: Azure Functions - LangChain with Azure OpenAI and ChatGPT (Python v2 Function)
 description: Using human prompt with Python as HTTP Get or Post input, calculates the completions using chains of human input and templates. 
