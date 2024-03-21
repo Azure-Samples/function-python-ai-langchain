@@ -21,7 +21,7 @@ module openai '../core/ai/cognitiveservices.bicep' = {
         model: {
           format: 'OpenAI'
           name: chatGptModelName
-          version: '0301'
+          version: '0613'
         }
         sku: {
           name: 'Standard'
