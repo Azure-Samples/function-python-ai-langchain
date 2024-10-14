@@ -19,20 +19,18 @@ os.environ["OPENAI_API_KEY"] = credential.get_token(
     ).token
 
 
-@app.function_name(name='ask')
-@app.route(route='ask', auth_level='anonymous', methods=['POST'])
+@app.function_name(name="ask")
+@app.route(route="ask", auth_level="function", methods=["POST"])
 def main(req):
 
-    prompt = req.params.get('prompt')
-    if not prompt:
-        try:
-            req_body = req.get_json()
-        except ValueError:
+    try:
+        req_body = req.get_json()
+        prompt = req_body.get("prompt")
+    except ValueError:
+        raise RuntimeError("prompt data must be set in POST.")
+    else:
+        if not prompt:
             raise RuntimeError("prompt data must be set in POST.")
-        else:
-            prompt = req_body.get('prompt')
-            if not prompt:
-                raise RuntimeError("prompt data must be set in POST.")
 
     # Init OpenAI: configure these using Env Variables
     AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -47,7 +45,7 @@ def main(req):
     # configure azure openai for langchain and/or llm
     openai.api_key = AZURE_OPENAI_KEY
     openai.api_base = AZURE_OPENAI_ENDPOINT
-    openai.api_type = 'azure'
+    openai.api_type = "azure"
 
     # this may change in the future
     openai.api_version = OPENAI_API_VERSION
