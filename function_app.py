@@ -2,10 +2,21 @@ import azure.functions as func
 import logging
 import os
 import openai
-from langchain.prompts import PromptTemplate
-from langchain.llms.openai import AzureOpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import AzureChatOpenAI
+from azure.identity import DefaultAzureCredential
 
 app = func.FunctionApp()
+
+
+# Use the Entra Id DefaultAzureCredential to get the token
+credential = DefaultAzureCredential()
+# Set the API type to `azure_ad`
+os.environ["OPENAI_API_TYPE"] = "azure_ad"
+# Set the API_KEY to the token from the Azure credential
+os.environ["OPENAI_API_KEY"] = credential.get_token(
+    "https://cognitiveservices.azure.com/.default"
+    ).token
 
 
 @app.function_name(name='ask')
@@ -18,18 +29,20 @@ def main(req):
             req_body = req.get_json()
         except ValueError:
             raise RuntimeError("prompt data must be set in POST.")
-        else: 
+        else:
             prompt = req_body.get('prompt')
             if not prompt:
                 raise RuntimeError("prompt data must be set in POST.")
 
-    # init OpenAI: Replace these with your own values, either in env vars
-    AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
+    # Init OpenAI: configure these using Env Variables
     AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    AZURE_OPENAI_KEY = credential.get_token(
+        "https://cognitiveservices.azure.com/.default"
+        ).token
     AZURE_OPENAI_CHATGPT_DEPLOYMENT = os.environ.get(
         "AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
-    if 'AZURE_OPENAI_KEY' not in os.environ:
-        raise RuntimeError("No 'AZURE_OPENAI_KEY' env var set.")
+    OPENAI_API_VERSION = os.environ.get(
+        "OPENAI_API_VERSION") or "2023-05-15"
 
     # configure azure openai for langchain and/or llm
     openai.api_key = AZURE_OPENAI_KEY
@@ -37,22 +50,21 @@ def main(req):
     openai.api_type = 'azure'
 
     # this may change in the future
-    # set this version in environment variables using OPENAI_API_VERSION
-    openai.api_version = '2023-05-15'
+    openai.api_version = OPENAI_API_VERSION
 
-    logging.info('Using Langchain')
-
-    llm = AzureOpenAI(
+    llm = AzureChatOpenAI(
         deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT,
         temperature=0.3,
         openai_api_key=AZURE_OPENAI_KEY
         )
-    llm_prompt = PromptTemplate(
-        input_variables=["human_prompt"],
-        template="The following is a conversation with an AI assistant. " +
-                 "The assistant is helpful.\n\n" +
-                 "A:How can I help you today?\nHuman: {human_prompt}?",
-    )
-    from langchain.chains import LLMChain
-    chain = LLMChain(llm=llm, prompt=llm_prompt)
-    return chain.run(prompt)
+    llm_prompt = PromptTemplate.from_template(
+        "The following is a conversation with an AI assistant. " +
+        "The assistant is helpful.\n\n" +
+        "A:How can I help you today?\nHuman: {human_prompt}?"
+        )
+    formatted_prompt = llm_prompt.format(human_prompt=prompt)
+
+    response = llm.invoke(formatted_prompt)
+    logging.info(response.content)
+
+    return func.HttpResponse(response.content)
