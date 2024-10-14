@@ -7,7 +7,7 @@ param environmentName string
 
 @minLength(1)
 @description('Primary location for all resources')
-@allowed(['australiaeast', 'eastasia', 'eastus', 'northeurope', 'southcentralus', 'southeastasia', 'uksouth', 'westus2'])
+@allowed(['australiaeast', 'eastasia', 'eastus', 'eastus2', 'northeurope', 'southcentralus', 'southeastasia', 'uksouth', 'westus2'])
 @metadata({
   azd: {
     type: 'location'
@@ -33,6 +33,7 @@ param openAiServiceName string = ''
 param openAiSkuName string
 @allowed([ 'azure', 'openai', 'azure_custom' ])
 param openAiHost string // Set in main.parameters.json
+param openAiApiVersion string = '2023-05-15'
 
 param chatGptModelName string = ''
 param chatGptDeploymentName string = ''
@@ -42,7 +43,7 @@ param chatGptDeploymentCapacity int = 0
 var chatGpt = {
   modelName: !empty(chatGptModelName) ? chatGptModelName : startsWith(openAiHost, 'azure') ? 'gpt-35-turbo' : 'gpt-3.5-turbo'
   deploymentName: !empty(chatGptDeploymentName) ? chatGptDeploymentName : 'chat'
-  deploymentVersion: !empty(chatGptDeploymentVersion) ? chatGptDeploymentVersion : '0613'
+  deploymentVersion: !empty(chatGptDeploymentVersion) ? chatGptDeploymentVersion : '0125'
   deploymentCapacity: chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 40
 }
 
@@ -104,7 +105,7 @@ module api './app/api.bicep' = {
     identityId: apiUserAssignedIdentity.outputs.identityId
     identityClientId: apiUserAssignedIdentity.outputs.identityClientId
     appSettings: {
-      OPENAI_API_VERSION: chatGpt.deploymentName
+      OPENAI_API_VERSION: openAiApiVersion
       AZURE_OPENAI_CHATGPT_MODEL: chatGpt.modelName
     }
     virtualNetworkSubnetId: skipVnet ? '' : serviceVirtualNetwork.outputs.appSubnetID
