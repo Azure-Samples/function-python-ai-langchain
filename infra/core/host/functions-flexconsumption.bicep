@@ -11,6 +11,7 @@ param virtualNetworkSubnetId string = ''
 param identityType string
 @description('User assigned identity name')
 param identityId string
+param keyVaultName string = ''
 
 // Runtime Properties
 @allowed([
@@ -26,6 +27,7 @@ param appSettings object = {}
 param instanceMemoryMB int = 2048
 param maximumInstanceCount int = 100
 param deploymentStorageContainerName string
+param appCommandLine string = ''
 
 resource stg 'Microsoft.Storage/storageAccounts@2022-09-01' existing = {
   name: storageAccountName
@@ -66,16 +68,27 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
     }
     virtualNetworkSubnetId: !empty(virtualNetworkSubnetId) ? virtualNetworkSubnetId : null
   }
-
-  resource configAppSettings 'config' = {
-    name: 'appsettings'
-    properties: union(appSettings,
+}
+// Updates to the single Microsoft.sites/web/config resources that need to be performed sequentially
+// sites/web/config 'appsettings'
+module configAppSettings 'appservice-appsettings.bicep' = {
+  name: '${name}-appSettings'
+  params: {
+    name: functions.name
+    appSettings: union(appSettings,
       {
         AzureWebJobsStorage__accountName: stg.name
         AzureWebJobsStorage__credential : 'managedidentity'
         APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString
-      })
+      },
+      runtimeName == 'python' && appCommandLine == '' ? { PYTHON_ENABLE_GUNICORN_MULTIWORKERS: 'true'} : {},
+      !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
+      !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {})
   }
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
+  name: keyVaultName
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
