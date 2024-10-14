@@ -1,47 +1,50 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
-
-param allowedOrigins array = []
 param applicationInsightsName string = ''
 param appServicePlanId string
 param appSettings object = {}
-param keyVaultName string
+param runtimeName string 
+param runtimeVersion string 
 param serviceName string = 'api'
 param storageAccountName string
-param openAiAccountName string
-param openAiResourceGroupName string
+param deploymentStorageContainerName string
+param virtualNetworkSubnetId string = ''
+param instanceMemoryMB int = 2048
+param maximumInstanceCount int = 100
+param identityId string = ''
+param identityClientId string = ''
+param aiServiceUrl string = ''
 
-module api '../core/host/functions.bicep' = {
-  name: '${serviceName}-functions-python-module'
+var applicationInsightsIdentity = 'ClientId=${identityClientId};Authorization=AAD'
+
+module api '../core/host/functions-flexconsumption.bicep' = {
+  name: '${serviceName}-functions-module'
   params: {
     name: name
     location: location
     tags: union(tags, { 'azd-service-name': serviceName })
-    allowedOrigins: allowedOrigins
-    alwaysOn: false
-    appSettings: union(appSettings, {
-        AZURE_OPENAI_KEY: openai.listKeys().key1
+    identityType: 'UserAssigned'
+    identityId: identityId
+    appSettings: union(appSettings,
+      {
+        AzureWebJobsStorage__clientId : identityClientId
+        APPLICATIONINSIGHTS_AUTHENTICATION_STRING: applicationInsightsIdentity
+        AZURE_OPENAI_ENDPOINT: aiServiceUrl
+        AZURE_CLIENT_ID: identityClientId
       })
     applicationInsightsName: applicationInsightsName
     appServicePlanId: appServicePlanId
-    keyVaultName: keyVaultName
-    //py
-    numberOfWorkers: 1
-    minimumElasticInstanceCount: 0
-    //--py
-    runtimeName: 'python'
-    runtimeVersion: '3.9'
+    runtimeName: runtimeName
+    runtimeVersion: runtimeVersion
     storageAccountName: storageAccountName
-    scmDoBuildDuringDeployment: false
+    deploymentStorageContainerName: deploymentStorageContainerName
+    virtualNetworkSubnetId: virtualNetworkSubnetId
+    instanceMemoryMB: instanceMemoryMB 
+    maximumInstanceCount: maximumInstanceCount
   }
 }
 
-resource openai 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: openAiAccountName
-  scope: resourceGroup(openAiResourceGroupName)
-}
-
-output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.identityPrincipalId
 output SERVICE_API_NAME string = api.outputs.name
 output SERVICE_API_URI string = api.outputs.uri
+output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.identityPrincipalId
