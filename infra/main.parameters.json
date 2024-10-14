@@ -33,7 +33,7 @@
       "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT_CAPACITY}"
     },
     "chatGptDeploymentVersion":{
-      "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT_VERSION}"
+      "value": "${OPENAI_API_VERSION=2023-05-15}"
     },
     "chatGptModelName":{
       "value": "${AZURE_OPENAI_CHATGPT_MODEL=gpt-35-turbo}"

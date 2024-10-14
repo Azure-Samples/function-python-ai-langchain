@@ -104,7 +104,8 @@ module api './app/api.bicep' = {
     identityId: apiUserAssignedIdentity.outputs.identityId
     identityClientId: apiUserAssignedIdentity.outputs.identityClientId
     appSettings: {
-      CHAT_MODEL_DEPLOYMENT_NAME: chatGpt.deploymentName
+      OPENAI_API_VERSION: chatGpt.deploymentName
+      AZURE_OPENAI_CHATGPT_MODEL: chatGpt.modelName
     }
     virtualNetworkSubnetId: skipVnet ? '' : serviceVirtualNetwork.outputs.appSubnetID
     aiServiceUrl: ai.outputs.endpoint
