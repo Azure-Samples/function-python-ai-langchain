@@ -1,8 +1,17 @@
-
-
+### Simple Ask Completion (Local)
 POST http://localhost:7071/api/ask HTTP/1.1
 content-type: application/json
 
 {
-    "prompt": "What is a good feature of Azure Functions?"
+    "prompt": "Tell me two most popular programming features of Azure Functions"
+}
+
+### Simple Ask Completion (Cloud)
+### .gitignore this file if and when you set key
+POST https://<your-function-name>.azurewebsites.net/api/ask HTTP/1.1
+content-type: application/json
+x-functions-key: <your-function-key>
+
+{
+    "prompt": "Tell me two most popular programming features of Azure Functions"
 }
