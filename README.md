@@ -98,25 +98,6 @@ code .
 
 4) Test using same REST client steps above
 
-
-## Source Code
-
-The key code that makes this work is as follows in [function_app.py](./function_app.py).  You can customize this or learn more snippets using the [LangChain Quickstart Guide](https://python.langchain.com/en/latest/getting_started/getting_started.html).
-
-```python
-llm = AzureOpenAI(deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT, temperature=0.3, openai_api_key=AZURE_OPENAI_KEY)
-
-llm_prompt = PromptTemplate(
-    input_variables=["human_prompt"],
-    template="The following is a conversation with an AI assistant. The assistant is helpful.\n\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: {human_prompt}?",
-)
-
-from langchain.chains import LLMChain
-chain = LLMChain(llm=llm, prompt=llm_prompt)
-
-return chain.run(prompt) # prompt is human input from request body
-```
-
 ## Deploy to Azure
 
 The easiest way to deploy this app is using the [Azure Dev CLI](https://aka.ms/azd).  If you open this repo in GitHub CodeSpaces the AZD tooling is already preinstalled.
@@ -128,21 +109,20 @@ azd up
 
 ## Source Code
 
-The key code that makes the prompting and completion work is as follows in [function_app.py](function_app.py).  The `/api/ask` function and route expects a prompt to come in the POST body using a standard HTTP Trigger in Python.  Then once the environment variables are set to configure OpenAI and LangChain frameworks, we can leverage favorite aspects of LangChain.  In this simple example we take a prompt, build a better prompt from a template, and then invoke the LLM.  By default the LLM deployment is `gpt-35-turbo` as defined in [./infra/main.parameters.json](./infra/main.parameters.json) but you can experiment with other models.    
+The key code that makes the prompting and completion work is as follows in [function_app.py](function_app.py).  The `/api/ask` function and route expects a prompt to come in the POST body using a standard HTTP Trigger in Python.  Then once the environment variables are set to configure OpenAI and LangChain frameworks via `init()` function, we can leverage favorite aspects of LangChain in the `main()` (ask) function.  In this simple example we take a prompt, build a better prompt from a template, and then invoke the LLM.  By default the LLM deployment is `gpt-35-turbo` as defined in [./infra/main.parameters.json](./infra/main.parameters.json) but you can experiment with other models and other aspects of Langchain's breadth of features.    
 
 ```python
 llm = AzureChatOpenAI(
     deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT,
-    temperature=0.3,
-    openai_api_key=AZURE_OPENAI_KEY
+    temperature=0.3
     )
 llm_prompt = PromptTemplate.from_template(
     "The following is a conversation with an AI assistant. " +
     "The assistant is helpful.\n\n" +
-    "A:How can I help you today?\nHuman: {human_prompt}?"
+    "A:How can I help you today?\n" +
+    "Human: {human_prompt}?"
     )
 formatted_prompt = llm_prompt.format(human_prompt=prompt)
 
 response = llm.invoke(formatted_prompt)
-logging.info(response.content)
 ```
