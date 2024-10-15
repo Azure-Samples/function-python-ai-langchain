@@ -2,7 +2,7 @@
 
 name: langchain-py-ai-func
 metadata:
-  template: langchain-py-ai-func@0.0.1-beta
+  template: langchain-py-ai-func@1.0.0
 services:
   api:
     project: ./

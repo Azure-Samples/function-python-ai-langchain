@@ -3,5 +3,7 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
+azure-identity
 openai
-langchain
+langchain-core
+langchain-openai

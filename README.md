@@ -26,23 +26,28 @@ This sample shows how to take a human prompt as HTTP Get or Post input, calculat
 ### Pre-reqs
 1) [Python 3.8+](https://www.python.org/) 
 2) [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cmacos%2Ccsharp%2Cportal%2Cbash#install-the-azure-functions-core-tools)
-3) [Azure OpenAPI API key, endpoint, and deployment](https://portal.azure.com) 
-4) Add this `local.settings.json` file to this folder to simplify local development and include Key from step 3
+3) [Azure Developer CLI](https://aka.ms/azd)
+4) Once you have your Azure subscription, run the following in a new terminal window to create Azure OpenAI and other resources needed:
+```bash
+azd provision
+```
 
-`./local.settings.json`
+Take note of the value of `AZURE_OPENAI_ENDPOINT` which can be found in `./.azure/<env name from azd provision>/.env`.  It will look something like:
+```bash
+AZURE_OPENAI_ENDPOINT="https://cog-<unique string>.openai.azure.com/"
+```
+
+5) Add this `local.settings.json` file to the root of the repo folder to simplify local development.  Replace `AZURE_OPENAI_ENDPOINT` with your value from step 4.  Optionally you can choose a different model deployment in `AZURE_OPENAI_CHATGPT_DEPLOYMENT`.  This file will be gitignored to protect secrets from committing to your repo, however by default the sample uses Entra identity (user identity and mananaged identity) so it is secretless.  
 ```json
 {
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
-    "AzureWebJobsStorage": "",
-    "AZURE_OPENAI_KEY": "...",
-    "AZURE_OPENAI_ENDPOINT": "https://<service_name>.openai.azure.com/",
-    "AZURE_OPENAI_SERVICE": "...",
-    "AZURE_OPENAI_CHATGPT_DEPLOYMENT": "...",
-    "OPENAI_API_VERSION": "2023-05-15",
-    "USE_LANGCHAIN": "True"
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AZURE_OPENAI_ENDPOINT": "https://<your deployment>.openai.azure.com/",
+    "AZURE_OPENAI_CHATGPT_DEPLOYMENT": "chat",
+    "OPENAI_API_VERSION": "2023-05-15"
   }
 }
 ```
@@ -119,4 +124,25 @@ The easiest way to deploy this app is using the [Azure Dev CLI](https://aka.ms/a
 To provision and deploy:
 ```bash
 azd up
+```
+
+## Source Code
+
+The key code that makes the prompting and completion work is as follows in [function_app.py](function_app.py).  The `/api/ask` function and route expects a prompt to come in the POST body using a standard HTTP Trigger in Python.  Then once the environment variables are set to configure OpenAI and LangChain frameworks, we can leverage favorite aspects of LangChain.  In this simple example we take a prompt, build a better prompt from a template, and then invoke the LLM.  By default the LLM deployment is `gpt-35-turbo` as defined in [./infra/main.parameters.json](./infra/main.parameters.json) but you can experiment with other models.    
+
+```python
+llm = AzureChatOpenAI(
+    deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT,
+    temperature=0.3,
+    openai_api_key=AZURE_OPENAI_KEY
+    )
+llm_prompt = PromptTemplate.from_template(
+    "The following is a conversation with an AI assistant. " +
+    "The assistant is helpful.\n\n" +
+    "A:How can I help you today?\nHuman: {human_prompt}?"
+    )
+formatted_prompt = llm_prompt.format(human_prompt=prompt)
+
+response = llm.invoke(formatted_prompt)
+logging.info(response.content)
 ```
