@@ -37,7 +37,7 @@ Take note of the value of `AZURE_OPENAI_ENDPOINT` which can be found in `./.azur
 AZURE_OPENAI_ENDPOINT="https://cog-<unique string>.openai.azure.com/"
 ```
 
-5) Add this `local.settings.json` file to the root of the repo folder to simplify local development.  Replace `AZURE_OPENAI_ENDPOINT` with your value from step 4.  Optionally you can choose a different model deployment in `CHAT_MODEL_DEPLOYMENT_NAME`.  This file will be gitignored to protect secrets from committing to your repo, however by default the sample uses Entra identity (user identity and mananaged identity) so it is secretless.  
+5) Add this `local.settings.json` file to the root of the repo folder to simplify local development.  Replace `AZURE_OPENAI_ENDPOINT` with your value from step 4.  Optionally you can choose a different model deployment in `AZURE_OPENAI_CHATGPT_DEPLOYMENT`.  This file will be gitignored to protect secrets from committing to your repo, however by default the sample uses Entra identity (user identity and mananaged identity) so it is secretless.  
 ```json
 {
   "IsEncrypted": false,

@@ -9,16 +9,45 @@ from azure.identity import DefaultAzureCredential
 app = func.FunctionApp()
 
 
-# Use the Entra Id DefaultAzureCredential to get the token
-credential = DefaultAzureCredential()
-# Set the API type to `azure_ad`
-os.environ["OPENAI_API_TYPE"] = "azure_ad"
-# Set the API_KEY to the token from the Azure credential
-os.environ["OPENAI_API_KEY"] = credential.get_token(
-    "https://cognitiveservices.azure.com/.default"
-    ).token
+# Initializes Azure OpenAI environment
+def init():
+    global credential
+    global AZURE_OPENAI_ENDPOINT
+    global AZURE_OPENAI_KEY
+    global AZURE_OPENAI_CHATGPT_DEPLOYMENT
+    global OPENAI_API_VERSION
+
+    # Use the Entra Id DefaultAzureCredential to get the token
+    credential = DefaultAzureCredential()
+    # Set the API type to `azure_ad`
+    os.environ["OPENAI_API_TYPE"] = "azure_ad"
+    # Set the API_KEY to the token from the Azure credential
+    os.environ["OPENAI_API_KEY"] = credential.get_token(
+        "https://cognitiveservices.azure.com/.default"
+        ).token
+
+    # Initialize Azure OpenAI environment
+    AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    AZURE_OPENAI_KEY = credential.get_token(
+        "https://cognitiveservices.azure.com/.default"
+        ).token
+    AZURE_OPENAI_CHATGPT_DEPLOYMENT = os.environ.get(
+        "AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
+    OPENAI_API_VERSION = os.environ.get(
+        "OPENAI_API_VERSION") or "2023-05-15"
+
+    # Configure base OpenAI framework for LangChain and/or llm
+    openai.api_key = AZURE_OPENAI_KEY
+    openai.api_base = AZURE_OPENAI_ENDPOINT
+    openai.api_type = "azure"
+    openai.api_version = OPENAI_API_VERSION
 
 
+# Initialize Azure OpenAI environment
+init()
+
+
+# Function App entry point route for /api/ask
 @app.function_name(name="ask")
 @app.route(route="ask", auth_level="function", methods=["POST"])
 def main(req):
@@ -32,24 +61,7 @@ def main(req):
         if not prompt:
             raise RuntimeError("prompt data must be set in POST.")
 
-    # Init OpenAI: configure these using Env Variables
-    AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
-    AZURE_OPENAI_KEY = credential.get_token(
-        "https://cognitiveservices.azure.com/.default"
-        ).token
-    AZURE_OPENAI_CHATGPT_DEPLOYMENT = os.environ.get(
-        "AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
-    OPENAI_API_VERSION = os.environ.get(
-        "OPENAI_API_VERSION") or "2023-05-15"
-
-    # configure azure openai for langchain and/or llm
-    openai.api_key = AZURE_OPENAI_KEY
-    openai.api_base = AZURE_OPENAI_ENDPOINT
-    openai.api_type = "azure"
-
-    # this may change in the future
-    openai.api_version = OPENAI_API_VERSION
-
+    # LangChain user code goes here
     llm = AzureChatOpenAI(
         deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT,
         temperature=0.3,
