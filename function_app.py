@@ -64,13 +64,13 @@ def main(req):
     # LangChain user code goes here
     llm = AzureChatOpenAI(
         deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT,
-        temperature=0.3,
-        openai_api_key=AZURE_OPENAI_KEY
+        temperature=0.3
         )
     llm_prompt = PromptTemplate.from_template(
         "The following is a conversation with an AI assistant. " +
         "The assistant is helpful.\n\n" +
-        "A:How can I help you today?\nHuman: {human_prompt}?"
+        "A:How can I help you today?\n" +
+        "Human: {human_prompt}?"
         )
     formatted_prompt = llm_prompt.format(human_prompt=prompt)
 
